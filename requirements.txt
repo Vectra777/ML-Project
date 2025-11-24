@@ -5,3 +5,4 @@ pandas
 numpy
 kagglehub
 opencv-python
+seaborn
