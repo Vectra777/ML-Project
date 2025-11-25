@@ -6,6 +6,7 @@ CNN-based classifier for PlantVillage leaf images. Includes utilities to fetch/c
 - `scripts/load_files.py`: downloads the Kaggle dataset, consolidates folders, builds `train_df.csv` and `test_df.csv`, and stores a `LabelBinarizer` in `scripts/artifacts/`.
 - `scripts/train.py`: trains a custom ConvNet (TensorFlow/Keras), plots training curves, exports `plant_disease_model.keras`, `confusion_matrix.png`, and `metrics.txt`.
 - `scripts/utilisation.py`: CLI inference tool to predict the top classes for a leaf image.
+- `scripts/interpretability.py`: generates Grad-CAM, LIME, and SHAP visualizations for sample images.
 - `scripts/artifacts/`: cached artifacts (model, metrics, plots, train/test CSVs). Safe to delete/regenerate.
 - `scripts/plantdisease_working/PlantVillage`: writable copy of the dataset (created by `load_files.py`).
 - `notebooks/`: exploratory work and usage demos.
@@ -58,6 +59,20 @@ Other predictions:
   - Tomato_Bacterial_spot (prob=0.0124)
   - Tomato__Target_Spot (prob=0.0031)
 ```
+
+## Interpretability (Grad-CAM, LIME, SHAP)
+Generate attribution overlays using the trained model and test split:
+```bash
+# Auto-sample 2 test images and run all methods
+python scripts/interpretability.py --sample-test 2
+
+# Provide specific images and lower SHAP background for memory
+python scripts/interpretability.py img1.jpg img2.jpg --background-size 10
+
+# Only run Grad-CAM and LIME
+python scripts/interpretability.py img1.jpg --methods gradcam lime
+```
+Outputs are saved to `scripts/artifacts/interpretability/`. SHAP can be memory-heavy; reduce `--background-size` or skip SHAP if you hit OOM.
 
 ## Notebooks
 - `notebooks/projet_ai_V1.ipynb` / `projet_ai_V2.ipynb`: data exploration and model iterations.

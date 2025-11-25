@@ -6,3 +6,6 @@ numpy
 kagglehub
 opencv-python
 seaborn
+lime
+shap
+scikit-image
