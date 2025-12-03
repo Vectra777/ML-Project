@@ -6,3 +6,7 @@ numpy
 kagglehub
 opencv-python
 fastapi
+seaborn
+lime
+shap
+scikit-image
