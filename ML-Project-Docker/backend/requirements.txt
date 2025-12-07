@@ -1,0 +1,16 @@
+tensorflow[and-cuda]
+scikit-learn
+matplotlib
+pandas
+numpy
+kagglehub
+opencv-python-headless
+fastapi
+seaborn
+lime
+shap
+scikit-image
+uvicorn
+python-multipart
+tensorflow-cpu
+pillow

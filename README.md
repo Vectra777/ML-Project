@@ -74,6 +74,16 @@ python scripts/interpretability.py img1.jpg --methods gradcam lime
 ```
 Outputs are saved to `scripts/artifacts/interpretability/`. SHAP can be memory-heavy; reduce `--background-size` or skip SHAP if you hit OOM.
 
+## Docker 
+Go into the ML-Project-Docker directory.
+
+Download the models here: https://drive.proton.me/urls/B41NN6PTG4#V7qhu29uy6ZS
+
+Put them in the backend/models/ directory.
+
+Then use the command: sudo docker-compose up -d --build
+
+Finally access the app via http://localhost:8080 
 ## Notebooks
 - `notebooks/projet_ai_V1.ipynb` / `projet_ai_V2.ipynb`: data exploration and model iterations.
 - `notebooks/usage.ipynb`: example inference workflow.

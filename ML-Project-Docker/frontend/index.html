@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Disease Detector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    #preview {
+      margin-top: 20px;
+      max-width: 300px;
+      display: none;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+    }
+    select,
+    input[type="file"] {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 20px;
+      margin-top: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    button:hover {
+      background: #218838;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    table th,
+    table td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    table th {
+      background: #f4f4f4;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 Plant Disease Detector</h1>
+  <p>Select a model and upload a leaf image to classify it.</p>
+
+  <!-- SELECT MODEL -->
+  <label for="modelSelect">Choose model:</label><br />
+  <select id="modelSelect"></select>
+
+  <!-- UPLOAD FORM -->
+  <form id="uploadForm" method="POST" enctype="multipart/form-data">
+    <input type="file" id="imageInput" name="image" accept="image/*" required /><br />
+    <button type="submit">Analyze Image</button>
+  </form>
+
+  <!-- IMAGE PREVIEW -->
+  <img id="preview" />
+
+  <!-- RESULT -->
+  <h2 id="result"></h2>
+
+  <!-- TABLE OF PROBABILITIES -->
+  <div id="probContainer"></div>
+
+  <script>
+    const API_BASE = "http://localhost:8000"; // Corrected port
+
+    // LOAD MODELS
+    async function loadModels() {
+      try {
+        const res = await fetch(`${API_BASE}/models`);
+        const data = await res.json();
+        const select = document.getElementById("modelSelect");
+        select.innerHTML = "";
+        data.available_models.forEach(model => {
+          const opt = document.createElement("option");
+          opt.value = model;
+          opt.textContent = model;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        alert("Failed to load models from backend");
+        console.error(err);
+      }
+    }
+    loadModels();
+
+    // IMAGE PREVIEW
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      }
+    });
+
+    // SEND REQUEST TO BACKEND
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("image", imageInput.files[0]);
+      formData.append("model", document.getElementById("modelSelect").value);
+
+      try {
+        const res = await fetch(`${API_BASE}/predict`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        console.log(data);
+
+        if (data.error || data.detail) {
+          document.getElementById("result").textContent = 
+            "❌ Error: " + (data.error || JSON.stringify(data.detail));
+          return;
+        }
+
+        // Show main result
+        document.getElementById("result").textContent = 
+          `Prediction: ${data.prediction} (${(data.confidence * 100).toFixed(2)}%)`;
+
+        // Show probability table
+        renderProbabilities(data.probabilities);
+      } catch (err) {
+        document.getElementById("result").textContent = "❌ Error contacting backend";
+        console.error(err);
+      }
+    });
+
+    // DISPLAY TABLE OF PROBABILITIES
+    function renderProbabilities(probabilities) {
+      const container = document.getElementById("probContainer");
+      container.innerHTML = "";
+
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <tr>
+          <th>Class</th>
+          <th>Probability</th>
+        </tr>
+      `;
+
+      Object.entries(probabilities)
+        .sort((a, b) => b[1] - a[1]) // highest first
+        .forEach(([label, prob]) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${label}</td>
+            <td>${(prob * 100).toFixed(2)}%</td>
+          `;
+          table.appendChild(row);
+        });
+
+      container.appendChild(table);
+    }
+  </script>
+</body>
+</html>
